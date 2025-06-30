@@ -1,0 +1,121 @@
+Here's a basic implementation of an Inventory Management System using Python and the Tkinter library for GUI.
+
+```
+import tkinter as tk
+from tkinter import messagebox
+import sqlite3
+
+class InventoryManagementSystem:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Inventory Management System")
+        self.db = sqlite3.connect("inventory.db")
+        self.cursor = self.db.cursor()
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                price REAL NOT NULL
+            )
+        """)
+        self.db.commit()
+        self.login_page()
+
+    def login_page(self):
+        self.clear_page()
+        tk.Label(self.root, text="Login Page").pack()
+        tk.Label(self.root, text="Username").pack()
+        self.username_entry = tk.Entry(self.root)
+        self.username_entry.pack()
+        tk.Label(self.root, text="Password").pack()
+        self.password_entry = tk.Entry(self.root, show="*")
+        self.password_entry.pack()
+        tk.Button(self.root, text="Login", command=self.login).pack()
+
+    def login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        if username == "admin" and password == "password":
+            self.main_page()
+        else:
+            messagebox.showerror("Invalid Credentials", "Please try again.")
+
+    def main_page(self):
+        self.clear_page()
+        tk.Label(self.root, text="Inventory Management System").pack()
+        tk.Button(self.root, text="Add Product", command=self.add_product_page).pack()
+        tk.Button(self.root, text="Edit Product", command=self.edit_product_page).pack()
+        tk.Button(self.root, text="Delete Product", command=self.delete_product_page).pack()
+        tk.Button(self.root, text="View Products", command=self.view_products_page).pack()
+        tk.Button(self.root, text="Low Stock Alert", command=self.low_stock_alert_page).pack()
+
+    def add_product_page(self):
+        self.clear_page()
+        tk.Label(self.root, text="Add Product").pack()
+        tk.Label(self.root, text="Name").pack()
+        self.name_entry = tk.Entry(self.root)
+        self.name_entry.pack()
+        tk.Label(self.root, text="Quantity").pack()
+        self.quantity_entry = tk.Entry(self.root)
+        self.quantity_entry.pack()
+        tk.Label(self.root, text="Price").pack()
+        self.price_entry = tk.Entry(self.root)
+        self.price_entry.pack()
+        tk.Button(self.root, text="Add Product", command=self.add_product).pack()
+
+    def add_product(self):
+        name = self.name_entry.get()
+        quantity = self.quantity_entry.get()
+        price = self.price_entry.get()
+        if name and quantity and price:
+            try:
+                quantity = int(quantity)
+                price = float(price)
+                self.cursor.execute("INSERT INTO products (name, quantity, price) VALUES (?, ?, ?)", (name, quantity, price))
+                self.db.commit()
+                messagebox.showinfo("Product Added", "Product added successfully.")
+                self.main_page()
+            except ValueError:
+                messagebox.showerror("Invalid Input", "Please enter valid quantity and price.")
+        else:
+            messagebox.showerror("Invalid Input", "Please fill out all fields.")
+
+    def edit_product_page(self):
+        self.clear_page()
+        tk.Label(self.root, text="Edit Product").pack()
+        tk.Label(self.root, text="Product ID").pack()
+        self.id_entry = tk.Entry(self.root)
+        self.id_entry.pack()
+        tk.Label(self.root, text="Name").pack()
+        self.name_entry = tk.Entry(self.root)
+        self.name_entry.pack()
+        tk.Label(self.root, text="Quantity").pack()
+        self.quantity_entry = tk.Entry(self.root)
+        self.quantity_entry.pack()
+        tk.Label(self.root, text="Price").pack()
+        self.price_entry = tk.Entry(self.root)
+        self.price_entry.pack()
+        tk.Button(self.root, text="Edit Product", command=self.edit_product).pack()
+
+    def edit_product(self):
+        id = self.id_entry.get()
+        name = self.name_entry.get()
+        quantity = self.quantity_entry.get()
+        price = self.price_entry.get()
+        if id and name and quantity and price:
+            try:
+                id = int(id)
+                quantity = int(quantity)
+                price = float(price)
+                self.cursor.execute("UPDATE products SET name = ?, quantity = ?, price = ? WHERE id = ?", (name, quantity, price, id))
+                self.db.commit()
+                messagebox.showinfo("Product Edited", "Product edited successfully.")
+                self.main_page()
+            except ValueError:
+                messagebox.showerror("Invalid Input", "Please enter valid product ID, quantity, and price.")
+        else:
+            messagebox.showerror("Invalid Input", "Please fill out all fields.")
+
+    def delete_product_page(self):
+        self.clear_page
